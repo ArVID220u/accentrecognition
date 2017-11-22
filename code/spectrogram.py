@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 #coding: utf-8
 """ This work is licensed under a Creative Commons Attribution 3.0 Unported License.
     Frank Zalkow, 2012-2013 """
@@ -8,7 +8,7 @@ from matplotlib import pyplot as plt
 import scipy.io.wavfile as wav
 from numpy.lib import stride_tricks
 
-plt.rc('text', usetex=True)
+#plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 """ short time fourier transform of audio signal """
@@ -86,5 +86,6 @@ def plotstft(audiopath, binsize=2**10, plotpath=None, colormap="jet"):
         
     plt.clf()
 
-plotstft("bar_om_pbN.wav", plotpath="bar_om_pbN.pdf")
+plotstft("../data/tmpvoices/skanska/fivesecfiles/out001001.wav", plotpath="skanska1.pdf")
+#plotstft("out001000test.wav", plotpath="skanska1.pdf")
         
