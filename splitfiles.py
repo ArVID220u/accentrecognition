@@ -11,7 +11,7 @@ count = 1
 for filename in os.listdir(indirectory):
     print("hej")
     # split the file into 5 sec intervals
-    command = "ffmpeg -i " + indirectory + "/" + filename + " -f segment -segment_time " + str(segment_time) + " -c copy " + outdirectory + "/out" + "{:03}".format(count) + "%03d.mp3"
+    command = "ffmpeg -i " + indirectory + "/" + filename + " -f segment -segment_time " + str(segment_time) + " -c copy " + outdirectory + "/out" + "{:03}".format(count) + "%03d.wav"
     os.system(command)
     print(command)
     # remove the last clip since it probably is < 5 seconds
@@ -23,3 +23,4 @@ for filename in os.listdir(indirectory):
     removefile = tempfiles[len(tempfiles)-1]
     print(outdirectory + "/" + removefile)
     count += 1
+
