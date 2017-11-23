@@ -11,7 +11,7 @@ count = 1
 for filename in os.listdir(indirectory):
     print("hej")
     # split the file into 5 sec intervals
-    command = "ffmpeg -i " + indirectory + "/" + filename + " -f segment -segment_time " + str(segment_time) + " -c copy " + outdirectory + "/out" + "{:03}".format(count) + "%03d.wav"
+    command = "ffmpeg -i " + indirectory + "/" + filename + " -f segment -segment_time " + str(segment_time) + " -c copy " + outdirectory + "/out" + "{:03}".format(count) + "%03d.mp3"
     os.system(command)
     print(command)
     # remove the last clip since it probably is < 5 seconds
@@ -26,5 +26,5 @@ for filename in os.listdir(indirectory):
 
 
 for filename in os.listdir(outdirectory):
-    command = "ffmpeg -i " + outdirectory + "/" + filename + " -c:a pcm_s32le -y -ac 1 " + outdirectory + "/" + filename
+    command = "ffmpeg -i " + outdirectory + "/" + filename + " -c:a pcm_s32le -y -ac 1 " + outdirectory + "/" + filename[:-4] + ".wav"
     os.system(command)
