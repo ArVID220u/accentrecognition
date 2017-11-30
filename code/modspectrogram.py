@@ -7,15 +7,15 @@ import numpy as np
 from matplotlib import pyplot as plt
 import scipy.io.wavfile as wav
 from numpy.lib import stride_tricks
+from math import *
 
 #plt.rc('text', usetex=True)
 plt.rc('font', family='serif')
 
 def hej(audiopath):
     samplerate, samples = wav.read(audiopath)
-    binsize = 2**10
+    binsize = 2**20
     s = stft(samples, binsize)
-
 
 """ short time fourier transform of audio signal """
 def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
@@ -26,10 +26,12 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
     samples = np.append(np.zeros(int(np.floor(frameSize/2.0))), sig)    
     # cols for windowing
     cols = np.ceil( (len(samples) - frameSize) / float(hopSize)) + 1
+    #cols = 250
     # zeros at end (thus samples can be fully covered by frames)
     samples = np.append(samples, np.zeros(frameSize))
     
     frames = stride_tricks.as_strided(samples, shape=(int(cols), int(frameSize)), strides=(int(samples.strides[0]*hopSize), int(samples.strides[0]))).copy()
+    print("frames shape: " + str(np.shape(frames)))
     frames *= win
     
     return np.fft.rfft(frames)    
@@ -37,6 +39,8 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
 """ scale frequency axis logarithmically """    
 def logscale_spec(spec, sr=44100, factor=20.):
     timebins, freqbins = np.shape(spec)
+    print("orig timebins: " + str(timebins))
+    print("orig freqbins: " + str(freqbins))
 
     scale = np.linspace(0, 1, freqbins) ** factor
     scale *= (freqbins-1)/max(scale)
@@ -65,36 +69,37 @@ def logscale_spec(spec, sr=44100, factor=20.):
 """ plot spectrogram"""
 def plotstft(audiopath, binsize=2**10, plotpath=None, colormap="jet"):
     samplerate, samples = wav.read(audiopath)
+    print("shape of wav samples: " + str(np.shape(samples)))
     s = stft(samples, binsize)
-    
-    sshow, freq = logscale_spec(s, factor=1.0, sr=samplerate)
-    ims = 20.*np.log10(np.abs(sshow)/10e-6) # amplitude to decibel
-    
-    timebins, freqbins = np.shape(ims)
-    print("timebins: " + str(timebins))
-    print("freqbins: " + str(freqbins))
-    
-    plt.figure(figsize=(15, 7.5))
-    plt.imshow(np.transpose(ims), origin="lower", aspect="auto", cmap=colormap, interpolation="none")
-    plt.colorbar()
 
-    plt.xlabel("time (s)")
-    plt.ylabel("frequency (hz)")
-    plt.xlim([0, timebins-1])
-    plt.ylim([0, freqbins])
+    print("timebins: " + str(np.shape(s)[0]))
+    print("freqbins: " + str(np.shape(s)[1]))
 
-    xlocs = np.float32(np.linspace(0, timebins-1, 5))
-    plt.xticks(xlocs, ["%.02f" % l for l in ((xlocs*len(samples)/timebins)+(0.5*binsize))/samplerate])
-    ylocs = np.int16(np.round(np.linspace(0, freqbins-1, 10)))
-    plt.yticks(ylocs, ["%.02f" % freq[i] for i in ylocs])
+    n = binsize
+    nUniquePts = int(ceil((n+1)/2.0))
+    s = abs(s)
+
+    s = s / float(n)
+    s = s**2
+
+    #s[:,arange(1,len(s)-1)] = s[:,arange(1, len(s) - 1))
+    s[:,1:len(s)-1] = s[:,1:len(s)-1]*2
+
+
+
+    # testing
+    g = s[100,:]
+    print("shg:" + str(np.shape(g)))
+
+    freqArray = np.arange(0, nUniquePts, 1.0) * (samplerate / n)
+    plt.plot(freqArray/1000, 10*np.log10(g), color='k')
+    plt.xlabel('Frequency (kHz)')
+    plt.ylabel('Power (dB)')
+    plt.show()
+
+
     
-    if plotpath:
-        plt.savefig(plotpath, bbox_inches="tight")
-    else:
-        plt.show()
-        
-    plt.clf()
 
-plotstft("../data/tmpvoices/skanska/fivesecfiles/out001001.wav", plotpath="skanska1.pdf")
+plotstft("../data/tmpvoices/skanska/fivesecfiles/out001002.wav", plotpath="skanska11.pdf", binsize=2**10)
 #plotstft("out001000test.wav", plotpath="skanska1.pdf")
         
