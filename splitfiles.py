@@ -17,14 +17,21 @@ for filename in os.listdir(indirectory):
     # remove the last clip since it probably is < 5 seconds
     tempfiles = []
     for tempfile in os.listdir(outdirectory):
-        if tempfile.startswith("out" + "{:03}".format(count)):
+        print(tempfile)
+        if tempfile.startswith("out" + "{:03}".format(count)) and tempfile.endswith("mp3"):
             tempfiles.append(tempfile)
+    print(tempfiles)
     tempfiles.sort()
+    print(tempfiles)
     removefile = tempfiles[len(tempfiles)-1]
-    print(outdirectory + "/" + removefile)
+    print(removefile)
+    os.remove(outdirectory + "/" + removefile)
+
     count += 1
+    break
 
 
 for filename in os.listdir(outdirectory):
     command = "ffmpeg -i " + outdirectory + "/" + filename + " -c:a pcm_s32le -y -ac 1 " + outdirectory + "/" + filename[:-4] + ".wav"
     os.system(command)
+    break
