@@ -35,7 +35,7 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
 def spectrogram(audiopath):
     binsize = 2**11
     samplerate, samples = wav.read(audiopath)
-    print(len(samples))
+    #print(len(samples))
     samples = samples[:219136]
     samples = samples / (2.**15)
     #print(samplerate)
@@ -55,7 +55,7 @@ def spectrogram(audiopath):
 
     #s[:,arange(1,len(s)-1)] = s[:,arange(1, len(s) - 1))
     s[:,1:len(s)-1] = s[:,1:len(s)-1]*2
-    print("shape of s: " + str(np.shape(s)));
+#    print("shape of s: " + str(np.shape(s)));
 
     ng = []
     compression = 10
@@ -78,9 +78,9 @@ def spectrogram(audiopath):
 
     ns = np.array(ng)
     ns /= maxx
-    print(ns)
+#    print(ns)
 
-    print("shape of ns: " + str(np.shape(ns)));
+#    print("shape of ns: " + str(np.shape(ns)));
 
 
     

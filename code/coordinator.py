@@ -33,10 +33,10 @@ def create_data_set(start_path, correct_answer):
     file_path = buildpath(i, j, start_path)
     file = Path(file_path)
 
-    while(file.is_file() and i == 1):
+    while(file.is_file()):
 #        print ("hej")    
         specto = sp.spectrogram(file_path)
-        specto = specto.flatten()
+        specto = np.reshape(specto, (12840, 1))
         training_data.append((specto, correct_answer))
         
         file = Path(buildpath(i, j + 1, start_path))
@@ -51,27 +51,27 @@ def create_data_set(start_path, correct_answer):
             file = Path(file_path)
             
 
-create_data_set("../data/tmpvoices/skanska/fivesecfiles/", np.array([1, 0]))
-create_data_set("../data/tmpvoices/stockholmska/fivesecfiles/", np.array([0, 1]))
+create_data_set("../data/tmpvoices/skanska/fivesecfiles/", np.array(np.reshape([1, 0], (2, 1))))
+create_data_set("../data/tmpvoices/stockholmska/fivesecfiles/", np.array(np.reshape([0, 1], (2, 1))))
 
 
-for item in training_data:
-    print(item[0].shape)
+#for item in training_data:
+#    print(item[0].shape)
 
 #shuffle the training data to get random test_data
 random.shuffle(training_data)
 
 #splitting training_data into test_data and training_data
-test_data = training_data[(len(training_data) - 4):]
-training_data = training_data[:(len(training_data) - 4)]
+test_data = training_data[(len(training_data) - 50):]
+training_data = training_data[:(len(training_data) - 50)]
 
 
 #print (test_data)
 #print (training_data)
 #data_points are the number of input neurons
 data_points = training_data[0][0].size
-print(data_points)
-print(training_data[0][0].shape)
+#print(data_points)
+#print(training_data[0][0].shape)
 #create the network object
 net = network.Network([data_points, 10, 10, 2])
 
@@ -79,12 +79,9 @@ net = network.Network([data_points, 10, 10, 2])
 net.SGD(training_data, 1, 10, 3.0, test_data=test_data)
 
 #saving the weights and biases of the trained net
-weight_file = open('saved_weigths.txt', 'w')
-bias_file = open('saved_biases.txt', 'w')
 
-for item in net.weights:
-    print>>weight_file, item
+weight_file = Path("saved_weights")
+bias_file = Path("saved_biases")
 
-for item in net.biases:
-    print>>bias_file, item
-
+np.save(weight_file, net.weights)
+np.save(bias_file, net.biases)

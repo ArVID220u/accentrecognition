@@ -51,6 +51,7 @@ class Network(object):
         network will be evaluated against the test data after each
         epoch, and partial progress printed out.  This is useful for
         tracking progress, but slows things down substantially."""
+        counter = 0
         if test_data: n_test = len(test_data)
         n = len(training_data)
         for j in range(epochs):
@@ -60,6 +61,8 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
+                print("Progress: ", counter/n)
+                counter += mini_batch_size
             if test_data:
                 print ("Epoch {0}: {1} / {2}".format(
                     j, self.evaluate(test_data), n_test))
@@ -96,7 +99,7 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
-            print(z)
+            #print(z)
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
@@ -123,9 +126,13 @@ class Network(object):
         network outputs the correct result. Note that the neural
         network's output is assumed to be the index of whichever
         neuron in the final layer has the highest activation."""
-        test_results = [(np.argmax(self.feedforward(x)), y)
+#        for (x, y) in test_data:
+#            print(np.argmax(self.feedforward(x)))
+
+        test_results = [(maxarg(self.feedforward(x)), y)
                         for (x, y) in test_data]
-        return sum(int(x == y) for (x, y) in test_results)
+  #      print(test_results)
+        return sum(int(np.array_equal(x, y)) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):
         """Return the vector of partial derivatives \partial C_x /
@@ -140,3 +147,10 @@ def sigmoid(z):
 def sigmoid_prime(z):
     """Derivative of the sigmoid function."""
     return sigmoid(z)*(1-sigmoid(z))
+
+def maxarg(x):
+    """instead of numpy's argmax, since numpy sucks"""
+    if(x[0][0] >= x[1][0]):
+        return np.array([[1], [0]])
+    else:
+        return np.array([[0], [1]])
