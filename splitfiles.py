@@ -28,10 +28,8 @@ for filename in os.listdir(indirectory):
     os.remove(outdirectory + "/" + removefile)
 
     count += 1
-    break
 
 
 for filename in os.listdir(outdirectory):
     command = "ffmpeg -i " + outdirectory + "/" + filename + " -c:a pcm_s32le -y -ac 1 " + outdirectory + "/" + filename[:-4] + ".wav"
     os.system(command)
-    break
