@@ -60,6 +60,7 @@ def spectrogram(audiopath):
     ng = []
     compression = 10
     cutoff = 300
+    maxx = 0
     for r in s:
         i = 0
         rg = []
@@ -71,10 +72,13 @@ def spectrogram(audiopath):
                 ni += 1
             avg /= (ni-i)
             i = ni
+            maxx = max(maxx, avg)
             rg.append(avg)
         ng.append(rg)
 
     ns = np.array(ng)
+    ns /= maxx
+    print(ns)
 
     print("shape of ns: " + str(np.shape(ns)));
 

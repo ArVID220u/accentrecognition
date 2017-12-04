@@ -70,6 +70,7 @@ training_data = training_data[:(len(training_data) - 4)]
 #print (training_data)
 #data_points are the number of input neurons
 data_points = training_data[0][0].size
+print(data_points)
 print(training_data[0][0].shape)
 #create the network object
 net = network.Network([data_points, 10, 10, 2])

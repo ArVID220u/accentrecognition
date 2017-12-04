@@ -96,6 +96,7 @@ class Network(object):
         for b, w in zip(self.biases, self.weights):
             z = np.dot(w, activation)+b
             zs.append(z)
+            print(z)
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
