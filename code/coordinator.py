@@ -33,7 +33,7 @@ def create_data_set(start_path, correct_answer):
     file_path = buildpath(i, j, start_path)
     file = Path(file_path)
 
-    while(file.is_file()):
+    while(file.is_file() and i <= 18):
 #        print ("hej")    
         specto = sp.spectrogram(file_path)
         specto = np.reshape(specto, (12840, 1))
