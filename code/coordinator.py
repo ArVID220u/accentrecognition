@@ -33,7 +33,7 @@ def create_data_set(start_path, correct_answer):
     file_path = buildpath(i, j, start_path)
     file = Path(file_path)
 
-    while(file.is_file() and i <= 18):
+    while(file.is_file()):
 #        print ("hej")    
         specto = sp.spectrogram(file_path)
         specto = np.reshape(specto, (12840, 1))
@@ -51,8 +51,8 @@ def create_data_set(start_path, correct_answer):
             file = Path(file_path)
             
 
-create_data_set("../data/tmpvoices/skanska/fivesecfiles/", np.array(np.reshape([1, 0], (2, 1))))
-create_data_set("../data/tmpvoices/stockholmska/fivesecfiles/", np.array(np.reshape([0, 1], (2, 1))))
+create_data_set("../data/sommarprat/eddieb/fivesecfiles/", np.array(np.reshape([1, 0], (2, 1))))
+create_data_set("../data/sommarprat/percy/fivesecfiles/", np.array(np.reshape([0, 1], (2, 1))))
 
 
 #for item in training_data:
@@ -76,7 +76,7 @@ data_points = training_data[0][0].size
 net = network.Network([data_points, 10, 10, 2])
 
 #trains the network with the training data
-net.SGD(training_data, 1, 10, 3.0, test_data=test_data)
+net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
 
 #saving the weights and biases of the trained net
 

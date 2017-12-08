@@ -9,6 +9,8 @@ segment_time = 5
 count = 1
 
 for filename in os.listdir(indirectory):
+    if(filename == ".DS_Store"):
+        continue
     print("hej")
     # split the file into 5 sec intervals
     command = "ffmpeg -i " + indirectory + "/" + filename + " -f segment -segment_time " + str(segment_time) + " -c copy " + outdirectory + "/out" + "{:03}".format(count) + "%03d.mp3"
