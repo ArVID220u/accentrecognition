@@ -24,6 +24,18 @@ def buildpath(a, b, start):
     start += b
     start += ".wav"
     return start
+
+
+def ans(classification):
+    if classification == "skanska":
+        return np.array(np.reshape([0, 1], (2, 1)))
+    elif classification == "stockholmska":
+        return np.array(np.reshape([1, 0], (2, 1)))
+    else:
+        import sys
+        sys.exit("ERROR: Classification needs to be either skanska or stockholmska. Line 36.")
+        
+
 #This fucntion takes all files from the start_path-directory and adds them to training_data
 def create_data_set(start_path, correct_answer):
 
@@ -49,39 +61,47 @@ def create_data_set(start_path, correct_answer):
             i += 1
             file_path = buildpath(i, j, start_path)
             file = Path(file_path)
-            
-
-create_data_set("../data/sommarprat/eddieb/fivesecfiles/", np.array(np.reshape([1, 0], (2, 1))))
-create_data_set("../data/sommarprat/percy/fivesecfiles/", np.array(np.reshape([0, 1], (2, 1))))
 
 
-#for item in training_data:
-#    print(item[0].shape)
 
-#shuffle the training data to get random test_data
-random.shuffle(training_data)
+def main():
+                
 
-#splitting training_data into test_data and training_data
-test_data = training_data[(len(training_data) - 50):]
-training_data = training_data[:(len(training_data) - 50)]
+    create_data_set("../data/sommarprat/eddieb/fivesecfiles/", ans("stockholmska"))
+    create_data_set("../data/sommarprat/percy/fivesecfiles/", ans("skanska"))
 
 
-#print (test_data)
-#print (training_data)
-#data_points are the number of input neurons
-data_points = training_data[0][0].size
-#print(data_points)
-#print(training_data[0][0].shape)
-#create the network object
-net = network.Network([data_points, 10, 10, 2])
+    #for item in training_data:
+    #    print(item[0].shape)
 
-#trains the network with the training data
-net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+    #shuffle the training data to get random test_data
+    random.shuffle(training_data)
 
-#saving the weights and biases of the trained net
+    #splitting training_data into test_data and training_data
+    test_data = training_data[(len(training_data) - 50):]
+    training_data = training_data[:(len(training_data) - 50)]
 
-weight_file = Path("saved_weights")
-bias_file = Path("saved_biases")
 
-np.save(weight_file, net.weights)
-np.save(bias_file, net.biases)
+    #print (test_data)
+    #print (training_data)
+    #data_points are the number of input neurons
+    data_points = training_data[0][0].size
+    #print(data_points)
+    #print(training_data[0][0].shape)
+    #create the network object
+    net = network.Network([data_points, 10, 10, 2])
+
+    #trains the network with the training data
+    net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+
+    #saving the weights and biases of the trained net
+
+    weight_file = Path("saved_weights")
+    bias_file = Path("saved_biases")
+
+    np.save(weight_file, net.weights)
+    np.save(bias_file, net.biases)
+
+
+if __name__ == "__main__":
+    main()
