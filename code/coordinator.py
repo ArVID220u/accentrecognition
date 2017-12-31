@@ -5,6 +5,7 @@ import numpy as np
 from pathlib import Path
 import random
 import network
+import os
 
 """
 takes wav files and runs them through spectogram to convert them to trainging sets for nielsens code
@@ -12,10 +13,9 @@ takes wav files and runs them through spectogram to convert them to trainging se
 
 #begin with skanska
 
-training_data = []
 
 def buildpath(a, b, start):
-    start += "out"
+    start += "fivesecfiles/out"
     a = str(a)
     b = str(b)
     start += (3 - len(a)) * "0"
@@ -26,7 +26,14 @@ def buildpath(a, b, start):
     return start
 
 
-def ans(classification):
+def ans(path):
+    
+    with open(path + "accent.txt") as a:
+        classification = a.read()
+
+    classification = classification[:-1]
+
+    print(classification)
     if classification == "skanska":
         return np.array(np.reshape([0, 1], (2, 1)))
     elif classification == "stockholmska":
@@ -35,22 +42,34 @@ def ans(classification):
         import sys
         sys.exit("ERROR: Classification needs to be either skanska or stockholmska. Line 36.")
         
+"""
+This fucntion takes all files from the start_path-directory and adds them to training_data.
+start_path is the directory where the files are situated and is_train_data is a boolean that decides whether 
+the data is going to be used for testing och training.
+"""
 
-#This fucntion takes all files from the start_path-directory and adds them to training_data
-def create_data_set(start_path, correct_answer):
+def create_data_set(start_path, is_train_data):
+
+    global training_data
+    global test_data
 
     i = 1
     j = 0
 
     file_path = buildpath(i, j, start_path)
     file = Path(file_path)
+    correct_answer = ans(start_path)
 
     while(file.is_file()):
 #        print ("hej")    
         specto = sp.spectrogram(file_path)
         specto = np.reshape(specto, (12840, 1))
-        training_data.append((specto, correct_answer))
-        
+        # Check if the files should be added to training_data or test_data
+        if(is_train_data):
+            training_data.append((specto, correct_answer))
+        else:
+            test_data.append((specto, correct_answer))
+
         file = Path(buildpath(i, j + 1, start_path))
 
         if(file.is_file()):
@@ -65,10 +84,22 @@ def create_data_set(start_path, correct_answer):
 
 
 def main():
-                
+    
+    global training_data
+    training_data = []
 
-    create_data_set("../data/sommarprat/eddieb/fivesecfiles/", ans("stockholmska"))
-    create_data_set("../data/sommarprat/percy/fivesecfiles/", ans("skanska"))
+    global test_data
+    test_data = []
+    
+    number_of_accents = 2
+    number_of_test = 2
+
+    
+    for filename in os.listdir("../data/sommarprat_test_data"):
+        create_data_set("../data/sommarprat_test_data/" + filename + "/", False)
+
+    for filename in os.listdir("../data/sommarprat"):
+        create_data_set("../data/sommarprat/" + filename + "/", True)
 
 
     #for item in training_data:
@@ -76,23 +107,21 @@ def main():
 
     #shuffle the training data to get random test_data
     random.shuffle(training_data)
+    random.shuffle(test_data)
 
     #splitting training_data into test_data and training_data
-    test_data = training_data[(len(training_data) - 50):]
-    training_data = training_data[:(len(training_data) - 50)]
+   # test_data = training_data[(len(training_data) - 100):]
+    #training_data = training_data[:(len(training_data) - 100)]
 
 
-    #print (test_data)
-    #print (training_data)
     #data_points are the number of input neurons
     data_points = training_data[0][0].size
-    #print(data_points)
-    #print(training_data[0][0].shape)
+
     #create the network object
     net = network.Network([data_points, 10, 10, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 30, 10, 3.0, test_data=test_data)
+    net.SGD(training_data, 15, 10, 3.0, test_data=test_data)
 
     #saving the weights and biases of the trained net
 
