@@ -25,15 +25,25 @@ def buildpath(a, b, start):
     start += ".wav"
     return start
 
+def precomppath(a, b, start):
+    start += "precomputed_spectrograms/out"
+    a = str(a)
+    b = str(b)
+    start += (3 - len(a)) * "0"
+    start += a
+    start += (3 - len(b)) * "0"
+    start += b
+    return start
 
 def ans(path):
     
     with open(path + "accent.txt") as a:
         classification = a.read()
 
+    #remove the newline at the end of a
     classification = classification[:-1]
 
-    print(classification)
+    print(path + "   " + classification)
     if classification == "skanska":
         return np.array(np.reshape([0, 1], (2, 1)))
     elif classification == "stockholmska":
@@ -52,35 +62,53 @@ def create_data_set(start_path, is_train_data):
 
     global training_data
     global test_data
+    #indexes for the audio files
 
-    i = 1
-    j = 0
-
-    file_path = buildpath(i, j, start_path)
-    file = Path(file_path)
     correct_answer = ans(start_path)
 
-    while(file.is_file()):
-#        print ("hej")    
-        specto = sp.spectrogram(file_path)
-        specto = np.reshape(specto, (12840, 1))
-        # Check if the files should be added to training_data or test_data
-        if(is_train_data):
-            training_data.append((specto, correct_answer))
-        else:
-            test_data.append((specto, correct_answer))
+    if (not os.path.exists(start_path + "precomputed_spectrograms")) or (len(os.listdir(start_path + "precomputed_spectrograms")) == 0):
+        if not os.path.exists(start_path + "precomputed_spectrograms"):
+            os.makedirs(start_path + "precomputed_spectrograms")
 
-        file = Path(buildpath(i, j + 1, start_path))
+        i = 1
+        j = 0
 
-        if(file.is_file()):
-            j += 1
-            file_path = buildpath(i, j, start_path)
-        else:
-            j = 0
-            i += 1
-            file_path = buildpath(i, j, start_path)
-            file = Path(file_path)
+        file_path = buildpath(i, j, start_path)
+        file = Path(file_path)
 
+        while(file.is_file()):
+    #        print ("hej")    
+            specto = sp.spectrogram(file_path)
+            specto = np.reshape(specto, (12840, 1))
+
+            #save the computed spectrograms
+            np.save(precomppath(i, j, start_path), (specto, correct_answer))
+
+            # Check if the files should be added to training_data or test_data
+
+            if(is_train_data):
+                training_data.append((specto, correct_answer))
+            else:
+                test_data.append((specto, correct_answer))
+
+            file = Path(buildpath(i, j + 1, start_path))
+
+            if(file.is_file()):
+                j += 1
+                file_path = buildpath(i, j, start_path)
+            else:
+                j = 0
+                i += 1
+                file_path = buildpath(i, j, start_path)
+                file = Path(file_path)
+
+    else:
+        for filename in os.listdir(start_path + "precomputed_spectrograms"):
+
+            if(is_train_data):
+                training_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
+            else:
+                test_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
 
 
 def main():
@@ -118,10 +146,15 @@ def main():
     data_points = training_data[0][0].size
 
     #create the network object
-    net = network.Network([data_points, 10, 10, 2])
+    net = network.Network([data_points, 15, 15, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 15, 10, 3.0, test_data=test_data)
+    net.SGD(training_data, 7, 50, 20.0, test_data=test_data)
+    net.SGD(training_data, 7, 50, 10.0, test_data=test_data)
+    net.SGD(training_data, 7, 50, 5.0, test_data=test_data)
+    net.SGD(training_data, 7, 50, 1.0, test_data=test_data)
+    net.SGD(training_data, 7, 50, 100.0, test_data=test_data)
+
 
     #saving the weights and biases of the trained net
 
