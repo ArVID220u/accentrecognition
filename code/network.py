@@ -61,7 +61,7 @@ class Network(object):
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
                 self.update_mini_batch(mini_batch, eta)
-                print("Progress: ", counter/n)
+#                print("Progress: ", counter/n)
                 counter += mini_batch_size
             if test_data:
                 print ("Epoch {0}: {1} / {2}".format(
@@ -131,7 +131,21 @@ class Network(object):
 
         test_results = [(maxarg(self.feedforward(x)), y)
                         for (x, y) in test_data]
-        print(test_results)
+#        print(test_results)
+        type1 = 0
+        type2 = 0
+        correct_type1 = 0
+        correct_type2 = 0
+        for (x, y) in test_results:
+            if y[0][0] == 1:
+                type1 += 1
+                correct_type1 += int(np.array_equal(x, y))
+            else:
+                type2 += 1
+                correct_type2 += int(np.array_equal(x, y))
+
+        print("Correct type1: " + str(correct_type1) + " / " + str(type1) + "    Correct type2: " + str(correct_type2) + " / " + str(type2))
+
         return sum(int(np.array_equal(x, y)) for (x, y) in test_results)
 
     def cost_derivative(self, output_activations, y):
