@@ -4,7 +4,7 @@ import os
 
 def splitfiles(indirectory, outdirectory):
 
-    segment_time = 5
+    segment_time = 10
 
     count = 1
 
@@ -37,10 +37,15 @@ def splitfiles(indirectory, outdirectory):
         os.system(command)
 
 filedirectory = input("directory with the files: ")
+xsecfiledirectory = input("xsecfiledirectory: ")
 
 for filename in os.listdir(filedirectory):
-    if(len(os.listdir(filedirectory + "/" + filename + "/fivesecfiles")) == 0 and len(os.listdir(filedirectory + "/" + filename + "/rawfiles")) > 0):
-        splitfiles(filedirectory + "/" + filename + "/rawfiles", filedirectory + "/" + filename + "/fivesecfiles")  
+
+    if not os.path.exists(filedirectory + "/" + filename + "/" + xsecfiledirectory):
+        os.makedirs(filedirectory + "/" + filename + "/" + xsecfiledirectory)
+    
+    if(len(os.listdir(filedirectory + "/" + filename + "/" + xsecfiledirectory)) == 0 and len(os.listdir(filedirectory + "/" + filename + "/rawfiles")) > 0):
+        splitfiles(filedirectory + "/" + filename + "/rawfiles", filedirectory + "/" + filename + "/" + xsecfiledirectory)  
     print(filedirectory + "/" + filename + "rawfiles")
 
 
