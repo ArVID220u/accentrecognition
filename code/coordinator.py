@@ -6,6 +6,7 @@ from pathlib import Path
 import random
 import network
 import os
+import setup
 
 """
 takes wav files and runs them through spectogram to convert them to trainging sets for nielsens code
@@ -125,13 +126,13 @@ def main():
     number_of_accents = 2
     number_of_test = 2
 
-    
-    for filename in os.listdir("../data/sommarprat_test_data"):
-        create_data_set("../data/sommarprat_test_data/" + filename + "/", False)
+   
+    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
+        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False)
 
     counter = 0
-    for filename in os.listdir("../data/sommarprat"):
-        create_data_set("../data/sommarprat/" + filename + "/", True)
+    for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
+        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True)
         counter += 1
         if debug and counter > 1:
             # debug means we want fast results

@@ -97,9 +97,3 @@ def spectrogram(audiopath):
     return ns
 
 
-    
-spectrogram("../data/tmpvoices/skanska/fivesecfiles/out001005.wav")
-spectrogram("../data/tmpvoices/skanska/fivesecfiles/out001000.wav")
-#plotstft("../data/tmpvoices/skanska/fivesecfiles/out001002.wav", plotpath="skanska11.pdf", binsize=2**10)
-#plotstft("440_sine.wav")
-#plotstft("out001000test.wav", plotpath="skanska1.pdf")
