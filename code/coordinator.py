@@ -103,12 +103,12 @@ def create_data_set(start_path, is_train_data, xsecfiles):
                 file = Path(file_path)
 
     else:
-        for filename in os.listdir(start_path + "precomputed_spectrograms"):
+        for filename in os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles):
 
             if(is_train_data):
-                training_data.append(np.load(start_path + "precomputed_spectrograms/_" + xsecfiles + "/" + filename))
+                training_data.append(np.load(start_path + "precomputed_spectrograms_" + xsecfiles + "/" + filename))
             else:
-                test_data.append(np.load(start_path + "precomputed_spectrograms/_" + xsecfiles + "/" + filename))
+                test_data.append(np.load(start_path + "precomputed_spectrograms_" + xsecfiles + "/" + filename))
 
 
 debug = False
@@ -158,11 +158,11 @@ def main():
     net = network.Network([data_points, 15, 15, 15, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 7, 200, 20.0, test_data=test_data)
-    net.SGD(training_data, 7, 200, 30.0, test_data=test_data)
-    net.SGD(training_data, 7, 200, 40.0, test_data=test_data)
-    net.SGD(training_data, 7, 200, 10.0, test_data=test_data)
-    net.SGD(training_data, 7, 200, 50.0, test_data=test_data)
+    net.SGD(training_data, 7, 20, 20.0, test_data=test_data)
+    net.SGD(training_data, 7, 20, 30.0, test_data=test_data)
+    net.SGD(training_data, 7, 20, 40.0, test_data=test_data)
+    net.SGD(training_data, 7, 20, 10.0, test_data=test_data)
+    net.SGD(training_data, 7, 20, 50.0, test_data=test_data)
 
 
     #saving the weights and biases of the trained net
@@ -170,8 +170,8 @@ def main():
     weight_file = Path("saved_weights")
     bias_file = Path("saved_biases")
 
-    np.save(weight_file, net.weights)
-    np.save(bias_file, net.biases)
+#    np.save(weight_file, net.weights)
+#    np.save(bias_file, net.biases)
 
 
 if __name__ == "__main__":
