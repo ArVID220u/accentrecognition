@@ -111,6 +111,9 @@ def create_data_set(start_path, is_train_data):
                 test_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
 
 
+debug = False
+
+
 def main():
     
     global training_data
@@ -126,8 +129,14 @@ def main():
     for filename in os.listdir("../data/sommarprat_test_data"):
         create_data_set("../data/sommarprat_test_data/" + filename + "/", False)
 
+    counter = 0
     for filename in os.listdir("../data/sommarprat"):
         create_data_set("../data/sommarprat/" + filename + "/", True)
+        counter += 1
+        if debug and counter > 1:
+            # debug means we want fast results
+            break
+
 
 
     #for item in training_data:
