@@ -146,14 +146,14 @@ def main():
     data_points = training_data[0][0].size
 
     #create the network object
-    net = network.Network([data_points, 15, 15, 2])
+    net = network.Network([data_points, 15, 15, 15, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 7, 50, 20.0, test_data=test_data)
-    net.SGD(training_data, 7, 50, 30.0, test_data=test_data)
-    net.SGD(training_data, 7, 50, 40.0, test_data=test_data)
-    net.SGD(training_data, 7, 50, 10.0, test_data=test_data)
-    net.SGD(training_data, 7, 50, 50.0, test_data=test_data)
+    net.SGD(training_data, 7, 200, 20.0, test_data=test_data)
+    net.SGD(training_data, 7, 200, 30.0, test_data=test_data)
+    net.SGD(training_data, 7, 200, 40.0, test_data=test_data)
+    net.SGD(training_data, 7, 200, 10.0, test_data=test_data)
+    net.SGD(training_data, 7, 200, 50.0, test_data=test_data)
 
 
     #saving the weights and biases of the trained net
