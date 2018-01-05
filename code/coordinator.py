@@ -14,8 +14,8 @@ takes wav files and runs them through spectogram to convert them to trainging se
 #begin with skanska
 
 
-def buildpath(a, b, start):
-    start += "fivesecfiles/out"
+def buildpath(a, b, start, xsecfiles):
+    start += xsecfiles + "/out"
     a = str(a)
     b = str(b)
     start += (3 - len(a)) * "0"
@@ -25,8 +25,8 @@ def buildpath(a, b, start):
     start += ".wav"
     return start
 
-def precomppath(a, b, start):
-    start += "precomputed_spectrograms/out"
+def precomppath(a, b, start, xsecfiles):
+    start += "precomputed_spectrograms_" + xsecfiles + "/out"
     a = str(a)
     b = str(b)
     start += (3 - len(a)) * "0"
@@ -58,7 +58,7 @@ start_path is the directory where the files are situated and is_train_data is a 
 the data is going to be used for testing och training.
 """
 
-def create_data_set(start_path, is_train_data):
+def create_data_set(start_path, is_train_data, xsecfiles):
 
     global training_data
     global test_data
@@ -66,23 +66,23 @@ def create_data_set(start_path, is_train_data):
 
     correct_answer = ans(start_path)
 
-    if (not os.path.exists(start_path + "precomputed_spectrograms")) or (len(os.listdir(start_path + "precomputed_spectrograms")) == 0):
-        if not os.path.exists(start_path + "precomputed_spectrograms"):
-            os.makedirs(start_path + "precomputed_spectrograms")
+    if (not os.path.exists(start_path + "precomputed_spectrograms_" + xsecfiles)) or (len(os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles)) == 0):
+        if not os.path.exists(start_path + "precomputed_spectrograms_" + xsecfiles):
+            os.makedirs(start_path + "precomputed_spectrograms_" + xsecfiles)
 
         i = 1
         j = 0
 
-        file_path = buildpath(i, j, start_path)
+        file_path = buildpath(i, j, start_path, xsecfiles)
         file = Path(file_path)
 
         while(file.is_file()):
     #        print ("hej")    
             specto = sp.spectrogram(file_path)
-            specto = np.reshape(specto, (12840, 1))
+            specto = np.reshape(specto, (specto.size, 1))
 
             #save the computed spectrograms
-            np.save(precomppath(i, j, start_path), (specto, correct_answer))
+            np.save(precomppath(i, j, start_path, xsecfiles), (specto, correct_answer))
 
             # Check if the files should be added to training_data or test_data
 
@@ -91,24 +91,24 @@ def create_data_set(start_path, is_train_data):
             else:
                 test_data.append((specto, correct_answer))
 
-            file = Path(buildpath(i, j + 1, start_path))
+            file = Path(buildpath(i, j + 1, start_path, xsecfiles))
 
             if(file.is_file()):
                 j += 1
-                file_path = buildpath(i, j, start_path)
+                file_path = buildpath(i, j, start_path, xsecfiles)
             else:
                 j = 0
                 i += 1
-                file_path = buildpath(i, j, start_path)
+                file_path = buildpath(i, j, start_path, xsecfiles)
                 file = Path(file_path)
 
     else:
         for filename in os.listdir(start_path + "precomputed_spectrograms"):
 
             if(is_train_data):
-                training_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
+                training_data.append(np.load(start_path + "precomputed_spectrograms/_" + xsecfiles + "/" + filename))
             else:
-                test_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
+                test_data.append(np.load(start_path + "precomputed_spectrograms/_" + xsecfiles + "/" + filename))
 
 
 debug = False
@@ -127,11 +127,11 @@ def main():
 
     
     for filename in os.listdir("../data/sommarprat_test_data"):
-        create_data_set("../data/sommarprat_test_data/" + filename + "/", False)
+        create_data_set("../data/sommarprat_test_data/" + filename + "/", False, "tensecfiles")
 
     counter = 0
     for filename in os.listdir("../data/sommarprat"):
-        create_data_set("../data/sommarprat/" + filename + "/", True)
+        create_data_set("../data/sommarprat/" + filename + "/", True, "tensecfiles")
         counter += 1
         if debug and counter > 1:
             # debug means we want fast results
