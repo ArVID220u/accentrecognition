@@ -111,7 +111,7 @@ def create_data_set(start_path, is_train_data):
                 test_data.append(np.load(start_path + "precomputed_spectrograms/" + filename))
 
 
-debug = True
+debug = False
 
 
 def main():
