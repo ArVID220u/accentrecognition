@@ -41,7 +41,7 @@ class Network(object):
             a = sigmoid(np.dot(w, a)+b)
         return a
 
-    def SGD(self, training_data, epochs, mini_batch_size, eta,
+    def SGD(self, training_data, epochs, mini_batch_size, eta, lmbda,
             test_data=None):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
@@ -60,7 +60,7 @@ class Network(object):
                 training_data[k:k+mini_batch_size]
                 for k in range(0, n, mini_batch_size)]
             for mini_batch in mini_batches:
-                self.update_mini_batch(mini_batch, eta)
+                self.update_mini_batch(mini_batch, eta, lmbda, n)
 #                print("Progress: ", counter/n)
                 counter += mini_batch_size
             if test_data:
@@ -69,7 +69,7 @@ class Network(object):
             else:
                 print ("Epoch {0} complete".format(j))
 
-    def update_mini_batch(self, mini_batch, eta):
+    def update_mini_batch(self, mini_batch, eta, lmbda, n):
         """Update the network's weights and biases by applying
         gradient descent using backpropagation to a single mini batch.
         The ``mini_batch`` is a list of tuples ``(x, y)``, and ``eta``
@@ -91,7 +91,7 @@ class Network(object):
         x_matrix = np.column_stack([training_sample[0] for training_sample in mini_batch])
         y_matrix = np.column_stack([training_sample[1] for training_sample in mini_batch])
         nabla_b, nabla_w = self.matrixbackprop(x_matrix, y_matrix)
-        weights_2 = [w - eta*nw for w, nw in zip(self.weights, nabla_w)]
+        weights_2 = [(1.0 - lmbda*eta/n)*w - eta*nw for w, nw in zip(self.weights, nabla_w)]
         biases_2 = [b - eta*nb for b, nb in zip(self.biases, nabla_b)]
 
         """
