@@ -58,26 +58,89 @@ def spectrogram(audiopath):
 #    print("shape of s: " + str(np.shape(s)));
 
     ng = []
-    compression = 10
+    frequency_compression = 10
+    time_compression = 10
     cutoff = 300
     maxx = 0
+
+    # compress times
+    cur_time = []
+    count = 0
+
     for r in s:
+        
         i = 0
         rg = []
         while i < cutoff:
+
+            # compress data points into one data point by averaging them
+            # this compresses frequencies
             avg = 0
             ni = i
-            while ni < len(r) and ni - i < 5:
+            while ni < len(r) and ni - i < frequency_compression:
                 avg += r[ni]
                 ni += 1
             avg /= (ni-i)
             i = ni
-            maxx = max(maxx, avg)
             rg.append(avg)
-        ng.append(rg)
+
+        if count >= time_compression:
+            # compress the cur_time
+            ddg = cur_time[0]
+            for dddd in cur_time[1:]:
+                assert len(dddd) == len(ddg)
+                for ii in range(len(dddd)):
+                    ddg[ii] += dddd[ii]
+            for ii in range(len(ddg)):
+                ddg[ii] = ddg[ii] / len(cur_time)
+            ng.append(ddg)
+            cur_time = []
+            cur_time.append(rg)
+            count = 1
+        else:
+            cur_time.append(rg)
+            count += 1
+
+    # add last cur_time
+    ddg = cur_time[0]
+    for dddd in cur_time[1:]:
+        assert len(dddd) == len(ddg)
+        for ii in range(len(dddd)):
+            ddg[ii] += dddd[ii]
+    for ii in range(len(ddg)):
+        ddg[ii] = ddg[ii] / len(cur_time)
+    ng.append(ddg)
+
+    # iterate to find max element
+    for f in ng:
+        for ff in f:
+            maxx = max(ff, maxx)
+
+    # now take logarithm of everything
+    for i in range(len(ng)):
+        for j in range(len(ng[i])):
+            ng[i][j] = ng[i][j] / maxx
+            ng[i][j] = max(ng[i][j], 0.00000000000001)
+            # we take minus to ensure we have all positive numbers (and one zero)
+            ng[i][j] = -log(ng[i][j], 2)
+            # make it pan out at something
+            ng[i][j] = min(ng[i][j], 15)
+            ng[i][j] = max(ng[i][j], 0)
+
+    # we now find max once again
+    # by now, we will have a logarithmic scale from 0 to 1 (which is inverted!)
+    maxx = 0
+    for f in ng:
+        for ff in f:
+            maxx = max(ff, maxx)
+
+    for i in range(len(ng)):
+        for j in range(len(ng[i])):
+            ng[i][j] = ng[i][j] / maxx
+            ng[i][j] = 1 - ng[i][j]
+            assert 0 <= ng[i][j] and ng[i][j] <= 1
 
     ns = np.array(ng)
-    ns /= maxx
 #    print(ns)
 
 #    print("shape of ns: " + str(np.shape(ns)));
