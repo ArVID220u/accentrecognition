@@ -32,7 +32,7 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
     return np.fft.rfft(frames)    
 
 
-def spectrogram(audiopath):
+def spectrogram(audiopath, time_compression=10, frequency_compression=10, cutoff=300):
     binsize = 2**11
     samplerate, samples = wav.read(audiopath)
     #print(len(samples))
@@ -58,8 +58,6 @@ def spectrogram(audiopath):
 #    print("shape of s: " + str(np.shape(s)));
 
     ng = []
-    compression = 10
-    cutoff = 300
     maxx = 0
     for r in s:
         i = 0
@@ -97,3 +95,9 @@ def spectrogram(audiopath):
     return ns
 
 
+def plot_spec(adp):
+    ns = spectrogram(adp,time_compression=10,frequency_compression=10,cutoff=350)
+    # purple means close to 0, yellow means close to 1
+    plt.pcolormesh(np.transpose(ns))
+    print("shape of ns: " + str(np.shape(ns)))
+    plt.savefig(adp[:-4] + ".png")
