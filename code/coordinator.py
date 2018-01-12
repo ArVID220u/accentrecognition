@@ -126,12 +126,12 @@ def main():
     number_of_accents = 2
     number_of_test = 2
 
-    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
-        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "tensecfiles")
+#    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
+#        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "tensecfiles")
 
     counter = 0
     for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
-        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "tensecfiles")
+        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "nomusic_fivesecfiles")
         counter += 1
         if debug and counter > 1:
             # debug means we want fast results
@@ -147,8 +147,8 @@ def main():
     random.shuffle(test_data)
 
     #splitting training_data into test_data and training_data
-   # test_data = training_data[(len(training_data) - 100):]
-    #training_data = training_data[:(len(training_data) - 100)]
+    test_data = training_data[(len(training_data) - 200):]
+    training_data = training_data[:(len(training_data) - 200)]
 
 
     #data_points are the number of input neurons
@@ -158,11 +158,7 @@ def main():
     net = network.Network([data_points, 150, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 7, 20, 5.0, test_data=test_data)
-    net.SGD(training_data, 7, 20, 2.5, test_data=test_data)
-    net.SGD(training_data, 7, 20, 1.25, test_data=test_data)
-    net.SGD(training_data, 7, 20, 10.0, test_data=test_data)
-    net.SGD(training_data, 7, 20, 1.0, test_data=test_data)
+    net.SGD(training_data, 100, 20, 0.5, test_data=test_data)
 
 
     #saving the weights and biases of the trained net
