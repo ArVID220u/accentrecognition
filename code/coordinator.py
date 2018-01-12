@@ -67,7 +67,7 @@ def create_data_set(start_path, is_train_data, xsecfiles):
 
     correct_answer = ans(start_path)
 
-    if (not os.path.exists(start_path + "precomputed_spectrograms_" + xsecfiles)) or (len(os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles)) == 0):
+    if debug or ((not os.path.exists(start_path + "precomputed_spectrograms_" + xsecfiles)) or (len(os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles)) == 0)):
         if not os.path.exists(start_path + "precomputed_spectrograms_" + xsecfiles):
             os.makedirs(start_path + "precomputed_spectrograms_" + xsecfiles)
 
@@ -91,8 +91,14 @@ def create_data_set(start_path, is_train_data, xsecfiles):
                 assert spectosize == specto.size
 
 
+            if debug:
+                np.set_printoptions(suppress=True)
+                print(specto)
+                sys.exit()
+
             #save the computed spectrograms
-            np.save(precomppath(i, j, start_path, xsecfiles), (specto, correct_answer))
+            if not debug:
+                np.save(precomppath(i, j, start_path, xsecfiles), (specto, correct_answer))
 
             # Check if the files should be added to training_data or test_data
 
@@ -115,8 +121,12 @@ def create_data_set(start_path, is_train_data, xsecfiles):
     else:
         for filename in os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles):
 
+            #is_train_data = (random.randint(1,10) != 1)
+            #is_train_data = True
+
             if(is_train_data):
                 training_data.append(np.load(start_path + "precomputed_spectrograms_" + xsecfiles + "/" + filename))
+                #test_data.append(np.load(start_path + "precomputed_spectrograms_" + xsecfiles + "/" + filename))
             else:
                 test_data.append(np.load(start_path + "precomputed_spectrograms_" + xsecfiles + "/" + filename))
 
@@ -136,11 +146,12 @@ def main():
     number_of_test = 2
 
     for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
-        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "tensecfiles")
+        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "sixsecfiles")
 
+    
     counter = 0
     for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
-        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "tensecfiles")
+        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "sixsecfiles")
         counter += 1
         if debug and counter > 1:
             # debug means we want fast results
@@ -164,14 +175,11 @@ def main():
     data_points = training_data[0][0].size
 
     #create the network object
-    net = network.Network([data_points, 150, 2])
+    net = network.Network([data_points, 50, 2])
 
     #trains the network with the training data
-    net.SGD(training_data, 7, 20, 5.0, test_data=test_data)
-    net.SGD(training_data, 7, 20, 2.5, test_data=test_data)
-    net.SGD(training_data, 7, 20, 1.25, test_data=test_data)
-    net.SGD(training_data, 7, 20, 10.0, test_data=test_data)
-    net.SGD(training_data, 7, 20, 1.0, test_data=test_data)
+    net.SGD(training_data, 50, 500, 10, 1, test_data=test_data)
+    net.SGD(training_data, 100, 500, 1, 1, test_data=test_data)
 
 
     #saving the weights and biases of the trained net
