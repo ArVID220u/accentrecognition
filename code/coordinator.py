@@ -126,8 +126,8 @@ def main():
     number_of_accents = 2
     number_of_test = 2
 
-#    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
-#        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "tensecfiles")
+    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
+        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "fivesecfiles")
 
     counter = 0
     for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
@@ -147,8 +147,8 @@ def main():
     random.shuffle(test_data)
 
     #splitting training_data into test_data and training_data
-    test_data = training_data[(len(training_data) - 200):]
-    training_data = training_data[:(len(training_data) - 200)]
+#    test_data = training_data[(len(training_data) - 200):]
+#    training_data = training_data[:(len(training_data) - 200)]
 
 
     #data_points are the number of input neurons
