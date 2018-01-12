@@ -77,10 +77,19 @@ def create_data_set(start_path, is_train_data, xsecfiles):
         file_path = buildpath(i, j, start_path, xsecfiles)
         file = Path(file_path)
 
+        global spectosize
+        spectosize = -1
+
         while(file.is_file()):
     #        print ("hej")    
             specto = sp.spectrogram(file_path)
             specto = np.reshape(specto, (specto.size, 1))
+            # spectogram size needs to be the same for all spectrograms. otherwise something is terribly wrong.
+            if spectosize == -1:
+                spectosize = specto.size
+            else:
+                assert spectosize == specto.size
+
 
             #save the computed spectrograms
             np.save(precomppath(i, j, start_path, xsecfiles), (specto, correct_answer))
