@@ -44,8 +44,11 @@ for filename in os.listdir(filedirectory):
     if not os.path.exists(filedirectory + "/" + filename + "/" + xsecfiledirectory):
         os.makedirs(filedirectory + "/" + filename + "/" + xsecfiledirectory)
     
+    if not os.path.exists(filedirectory + "/" + filename + "/" + rawfiledirectory):
+        os.makedirs(filedirectory + "/" + filename + "/" + rawfiledirectory)
+
     if(len(os.listdir(filedirectory + "/" + filename + "/" + xsecfiledirectory)) == 0 and len(os.listdir(filedirectory + "/" + filename + "/" + rawfiledirectory)) > 0):
         splitfiles(filedirectory + "/" + filename + "/" + rawfiledirectory, filedirectory + "/" + filename + "/" + xsecfiledirectory, segment_time)  
     print(filedirectory + "/" + filename + "/" + rawfiledirectory)
 
-
+    
