@@ -121,7 +121,7 @@ def create_data_set(start_path, is_train_data, xsecfiles):
     else:
         for filename in os.listdir(start_path + "precomputed_spectrograms_" + xsecfiles):
 
-            #is_train_data = (random.randint(1,10) != 1)
+            is_train_data = (random.randint(1,10) != 1)
             #is_train_data = True
 
             if(is_train_data):
@@ -145,8 +145,8 @@ def main():
     number_of_accents = 2
     number_of_test = 2
 
-    for filename in os.listdir(setup.DATA_PATH + "sommarprat_test_data"):
-        create_data_set(setup.DATA_PATH + "sommarprat_test_data/" + filename + "/", False, "fivesecfiles")
+    #for filename in os.listdir(setup.DATA_PATH + "tmpvoices2"):
+    #    create_data_set(setup.DATA_PATH + "tmpvoices2/" + filename + "/", False, "fivesecfiles")
 
     
     counter = 0
@@ -177,8 +177,13 @@ def main():
     #create the network object
     net = network.Network([data_points, 50, 2])
 
+    print(len(test_data))
+    print(len(training_data))
+
     #trains the network with the training data
-    net.SGD(training_data, 100, 20, 0.5, test_data=test_data)
+    net.SGD(training_data, epochs=15, mini_batch_size=20, eta=0.01, lmbda=0, test_data=test_data)
+    net.SGD(training_data, epochs=80, mini_batch_size=20, eta=0.004, lmbda=0.0001, test_data=test_data)
+    net.SGD(training_data, epochs=100, mini_batch_size=20, eta=0.001, lmbda=0, test_data=test_data)
 
 
     #saving the weights and biases of the trained net
