@@ -11,6 +11,7 @@ and omits many desirable features.
 #### Libraries
 # Standard library
 import random
+import sys
 
 # json is used for saving networks
 import json 
@@ -23,7 +24,7 @@ import numpy as np
 
 #### Define the quadratic and cross-entropy cost functions
 
-class QuadraticCost(object):
+class QuadraticCost():
 
     @staticmethod
     def fn(a, y):
@@ -38,7 +39,7 @@ class QuadraticCost(object):
         to each weighted input to each node in the last layer."""
         return (a-y) * sigmoid_prime(z)
 
-class CrossEntropyCost(object):
+class CrossEntropyCost():
 
     @staticmethod
     def fn(a, y):
@@ -61,7 +62,7 @@ class CrossEntropyCost(object):
 
 
 
-class Network(object):
+class Network():
 
     def __init__(self, sizes, cost=CrossEntropyCost):
         """The list ``sizes`` contains the number of neurons in the
@@ -103,7 +104,11 @@ class Network(object):
         return a
 
     def SGD(self, training_data, epochs, mini_batch_size, eta, lmbda,
-            test_data=None):
+            test_data=None, 
+            monitor_test_cost=False,
+            monitor_test_accuracy=False,
+            monitor_training_cost=False,
+            monitor_training_accuracy=False):
         """Train the neural network using mini-batch stochastic
         gradient descent.  The ``training_data`` is a list of tuples
         ``(x, y)`` representing the training inputs and the desired
@@ -115,6 +120,8 @@ class Network(object):
         counter = 0
         if test_data: n_test = len(test_data)
         n = len(training_data)
+        test_cost, test_accuracy = [], []
+        training_cost, training_accuracy = [], []
         for j in range(epochs):
             random.shuffle(training_data)
             mini_batches = [
@@ -124,11 +131,27 @@ class Network(object):
                 self.update_mini_batch(mini_batch, eta, lmbda, n)
 #                print("Progress: ", counter/n)
                 counter += mini_batch_size
-            if test_data:
-                print ("Epoch {0}: {1} / {2}".format(
-                    j, self.evaluate(test_data), n_test))
-            else:
-                print ("Epoch {0} complete".format(j))
+            print("Epoch {0} complete".format(j))
+            if test_data and monitor_test_accuracy:
+                accuracy = self.evaluate(test_data)
+                test_accuracy.append(accuracy)
+                print("\tTest data accuracy: {0} / {1}".format(accuracy, n_test))
+            if test_data and monitor_test_cost:
+                cost = self.total_cost(test_data, lmbda)
+                test_cost.append(cost)
+                print("\tTest data cost: {0}".format(cost))
+            if monitor_training_accuracy:
+                accuracy = self.evaluate(training_data)
+                training_accuracy.append(accuracy)
+                print("\tTraining data accuracy: {0} / {1}".format(accuracy, n))
+            if monitor_training_cost:
+                cost = self.total_cost(training_data, lmbda)
+                test_cost.append(cost)
+                print("\tTraining data cost: {0}".format(cost))
+
+        return_val = {"test_cost": test_cost, "test_accuracy": test_accuracy, "training_cost": training_cost, "training_accuracy": training_accuracy, "n_test": n_test, "n_training": n}
+        return return_val
+
 
     def update_mini_batch(self, mini_batch, eta, lmbda, n):
         """Update the network's weights and biases by applying
@@ -276,6 +299,16 @@ class Network(object):
         print("Correct type1: " + str(correct_type1) + " / " + str(type1) + "    Correct type2: " + str(correct_type2) + " / " + str(type2))
 
         return sum(int(np.array_equal(x, y)) for (x, y) in test_results)
+
+    def total_cost(self, data, lmbda):
+        """Return the total cost for the data set."""
+        cost = 0.0
+        for x, y in data:
+            a = self.feedforward(x)
+            cost += self.cost.fn(a, y)/len(data)
+        cost += 0.5*(lmbda/len(data))*sum(
+            np.linalg.norm(w)**2 for w in self.weights)
+        return cost
 
 
     def save(self, filename):

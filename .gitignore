@@ -3,3 +3,5 @@ __pycache__
 data
 *.pyc
 code/setup.py
+code/lasthistory.json
+code/lastnetwork.json
