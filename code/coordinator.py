@@ -7,6 +7,7 @@ import random
 import network
 import os
 import setup
+import json
 
 """
 takes wav files and runs them through spectogram to convert them to trainging sets for nielsens code
@@ -170,14 +171,19 @@ def main():
     print(len(training_data))
 
     #trains the network with the training data
-    net.SGD(training_data, epochs=100, mini_batch_size=10, eta=0.001, lmbda=1, test_data=test_data)
+    history_data = net.SGD(training_data, epochs=100, mini_batch_size=10, eta=0.004, lmbda=1, test_data=test_data, monitor_training_accuracy=True, monitor_test_cost=True, monitor_training_cost=True, monitor_test_accuracy=True)
 
+    
+    # save the history data
+    with open("lasthistory.json", "w") as f:
+        json.dump(history_data, f)
 
     #saving the weights and biases of the trained net
 
     weight_file = Path("saved_weights")
     bias_file = Path("saved_biases")
     net.save("lastnetwork.json")
+
 
 #    np.save(weight_file, net.weights)
 #    np.save(bias_file, net.biases)
