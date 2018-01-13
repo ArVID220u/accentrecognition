@@ -19,9 +19,10 @@ import json
 # Third-party libraries
 import numpy as np
 
+
 class Network(object):
 
-    def __init__(self, sizes):
+    def __init__(self, sizes, cost=CrossEntropyCost):
         """The list ``sizes`` contains the number of neurons in the
         respective layers of the network.  For example, if the list
         was [2, 3, 1] then it would be a three-layer network, with the
@@ -31,6 +32,7 @@ class Network(object):
         self.num_layers = len(sizes)
         self.sizes = sizes
         self.default_weight_initializer()
+        self.cost = cost
 
     def default_weight_initializer(self):
         """Initialize each weight using a Gaussian distribution with mean 0
@@ -140,8 +142,7 @@ class Network(object):
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * \
-            sigmoid_prime(zs[-1])
+        delta = self.cost.delta(zs[-1], activations[-1], y)
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
@@ -189,7 +190,7 @@ class Network(object):
             activations.append(activation)
 
         # backward pass
-        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
+        delta = self.cost.delta(zs[-1], activations[-1], y)
         nabla_b[-1] = col_avg(delta)
         nabla_w[-1] = np.dot(delta, activations[-2].transpose()) / num_samples
         # Note that the variable l in the loop below is used a little
@@ -235,18 +236,14 @@ class Network(object):
 
         return sum(int(np.array_equal(x, y)) for (x, y) in test_results)
 
-    def cost_derivative(self, output_activations, y):
-        """Return the vector of partial derivatives \partial C_x /
-        \partial a for the output activations."""
-        return (output_activations-y)
-
 
     def save(self, filename):
         """Save the neural network to the filename."""
         """Save it in json format, so as to be able to update the network structure later."""
         data = {"sizes": self.sizes,
                 "weights": [w.tolist() for w in self.weights],
-                "biases": [b.tolist() for b in self.biases]}
+                "biases": [b.tolist() for b in self.biases],
+                "cost": str(self.cost.__name__)}
         with open(filename, "w") as f:
             json.dump(data, f)
 
@@ -258,13 +255,11 @@ class Network(object):
         with open(filename, "r") as f:
             data = json.load(f)
         assert data != ""
+        cost = getattr(sys.modules[__name__], data["cost"])
         network = cls(data["sizes"])
         network.weights = [np.array(w) for w in data["weights"]]
         network.biases = [np.array(b) for b in data["biases"]]
         return network
-
-
-
 
 
 
@@ -288,3 +283,41 @@ def maxarg(x):
         return np.array([[1], [0]])
     else:
         return np.array([[0], [1]])
+
+
+
+#### Define the quadratic and cross-entropy cost functions
+
+class QuadraticCost(object):
+
+    @staticmethod
+    def fn(a, y):
+        """Return the cost associated with an output a and desired output y."""
+        """ the norm of a the a-y column matrix is simply its absolute value if treated as a vector."""
+        return 0.5*np.linalg.norm(a-y)**2
+
+    @staticmethod
+    def delta(z, a, y):
+        """Return the error delta from the output layer."""
+        """This is the partial derivative of the cost function with respect
+        to each weighted input to each node in the last layer."""
+        return (a-y) * sigmoid_prime(z)
+
+class CrossEntropyCost(object):
+
+    @staticmethod
+    def fn(a, y):
+        """Return the cost associated with an output a and desired output y.
+        Note that np.nan_to_num is used to ensure numerical stability.
+        In particular, if both a and y have a 1.0 in the same slot,
+        then the expression (1-y)*np.log(1-a) returns nan.
+        The np.nan_to_num ensures that that is converted to the correct value (0.0)."""
+        return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))
+
+    @staticmethod
+    def delta(z, a, y):
+        """Return the error delta from the output layer.  Note that the
+        parameter z is not used by the method.  It is included in
+        the method's parameters in order to make the interface
+        consistent with the delta method for other cost classes."""
+        return (a-y)
