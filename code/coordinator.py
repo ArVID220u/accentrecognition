@@ -119,8 +119,7 @@ def create_data_set(start_path, is_train_data, xsecfiles, time_compression=None,
     else:
         for filename in os.listdir(precomputedspectrogrampath):
 
-            is_train_data = (random.randint(1,10) != 1)
-            #is_train_data = True
+            #is_train_data = (random.randint(1,10) != 1)
 
             if(is_train_data):
                 training_data.append(np.load(precomputedspectrogrampath + "/" + filename))
@@ -142,8 +141,8 @@ def main():
     number_of_accents = 2
     number_of_test = 2
 
-    #for filename in os.listdir(setup.DATA_PATH + "tmpvoices2"):
-    #    create_data_set(setup.DATA_PATH + "tmpvoices2/" + filename + "/", False, "fivesecfiles")
+    for filename in os.listdir(setup.DATA_PATH + "tmpvoices2"):
+        create_data_set(setup.DATA_PATH + "tmpvoices2/" + filename + "/", False, "noknas_fivesecfiles")
 
     
     for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
@@ -173,12 +172,12 @@ def main():
     print(len(training_data))
 
     #trains the network with the training data
-    history_data = net.SGD(training_data, epochs=200, mini_batch_size=100, eta=0.02, lmbda=0.1,
+    history_data = net.SGD(training_data, epochs=1000, mini_batch_size=100, eta=0.4, lmbda=1,
             test_data=test_data,
-            monitor_training_accuracy=False,
+            monitor_training_accuracy=True,
             monitor_test_cost=False,
-            monitor_training_cost=False,
-            monitor_test_accuracy=True)
+            monitor_training_cost=True,
+            monitor_test_accuracy=False)
 
     
     # save the history data
