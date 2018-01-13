@@ -1,6 +1,7 @@
 """
 network.py
 ~~~~~~~~~~
+
 A module to implement the stochastic gradient descent learning
 algorithm for a feedforward neural network.  Gradients are calculated
 using backpropagation.  Note that I have focused on making the code
@@ -12,89 +13,27 @@ and omits many desirable features.
 # Standard library
 import random
 
-# json is used for saving networks
-import json 
-
 # Third-party libraries
 import numpy as np
 
-
-
-
-#### Define the quadratic and cross-entropy cost functions
-
-class QuadraticCost(object):
-
-    @staticmethod
-    def fn(a, y):
-        """Return the cost associated with an output a and desired output y."""
-        """ the norm of a the a-y column matrix is simply its absolute value if treated as a vector."""
-        return 0.5*np.linalg.norm(a-y)**2
-
-    @staticmethod
-    def delta(z, a, y):
-        """Return the error delta from the output layer."""
-        """This is the partial derivative of the cost function with respect
-        to each weighted input to each node in the last layer."""
-        return (a-y) * sigmoid_prime(z)
-
-class CrossEntropyCost(object):
-
-    @staticmethod
-    def fn(a, y):
-        """Return the cost associated with an output a and desired output y.
-        Note that np.nan_to_num is used to ensure numerical stability.
-        In particular, if both a and y have a 1.0 in the same slot,
-        then the expression (1-y)*np.log(1-a) returns nan.
-        The np.nan_to_num ensures that that is converted to the correct value (0.0)."""
-        return np.sum(np.nan_to_num(-y*np.log(a)-(1-y)*np.log(1-a)))
-
-    @staticmethod
-    def delta(z, a, y):
-        """Return the error delta from the output layer.  Note that the
-        parameter z is not used by the method.  It is included in
-        the method's parameters in order to make the interface
-        consistent with the delta method for other cost classes."""
-        return (a-y)
-
-
-
-
-
 class Network(object):
 
-    def __init__(self, sizes, cost=CrossEntropyCost):
+    def __init__(self, sizes):
         """The list ``sizes`` contains the number of neurons in the
         respective layers of the network.  For example, if the list
         was [2, 3, 1] then it would be a three-layer network, with the
         first layer containing 2 neurons, the second layer 3 neurons,
         and the third layer 1 neuron.  The biases and weights for the
-        network are initialized randomly using default_weight_initializer."""
+        network are initialized randomly, using a Gaussian
+        distribution with mean 0, and variance 1.  Note that the first
+        layer is assumed to be an input layer, and by convention we
+        won't set any biases for those neurons, since biases are only
+        ever used in computing the outputs from later layers."""
         self.num_layers = len(sizes)
         self.sizes = sizes
-        self.default_weight_initializer()
-        self.cost = cost
-
-    def default_weight_initializer(self):
-        """Initialize each weight using a Gaussian distribution with mean 0
-        and standard deviation 1 over the square root of the number of
-        weights connecting to the same neuron.  Initialize the biases
-        using a Gaussian distribution with mean 0 and standard
-        deviation 1.
-
-        Note that the first layer is assumed to be an input layer, and
-        by convention we won't set any biases for those neurons, since
-        biases are only ever used in computing the outputs from later
-        layers."""
-        self.biases = [np.random.randn(y, 1) for y in self.sizes[1:]]
-        self.weights = [np.random.randn(y, x)/np.sqrt(x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
-    
-    def large_weight_initializer(self):
-        """Initialize each weight and bias using Guassian distribution with mean 0
-        and standard deviation 1. Will lead to saturated hidden neurons and therefore to slow learning.
-        Only use it for comparison purposes."""
-        self.biases = [np.random.randn(y, 1) for y in self.sizes[1:]]
-        self.weights = [np.random.randn(y, x) for x, y in zip(self.sizes[:-1], self.sizes[1:])]
+        self.biases = [np.random.randn(y, 1) for y in sizes[1:]]
+        self.weights = [np.random.randn(y, x)
+                        for x, y in zip(sizes[:-1], sizes[1:])]
 
     def feedforward(self, a):
         """Return the output of the network if ``a`` is input."""
@@ -183,7 +122,8 @@ class Network(object):
             activation = sigmoid(z)
             activations.append(activation)
         # backward pass
-        delta = self.cost.delta(zs[-1], activations[-1], y)
+        delta = self.cost_derivative(activations[-1], y) * \
+            sigmoid_prime(zs[-1])
         nabla_b[-1] = delta
         nabla_w[-1] = np.dot(delta, activations[-2].transpose())
         # Note that the variable l in the loop below is used a little
@@ -231,7 +171,7 @@ class Network(object):
             activations.append(activation)
 
         # backward pass
-        delta = self.cost.delta(zs[-1], activations[-1], y)
+        delta = self.cost_derivative(activations[-1], y) * sigmoid_prime(zs[-1])
         nabla_b[-1] = col_avg(delta)
         nabla_w[-1] = np.dot(delta, activations[-2].transpose()) / num_samples
         # Note that the variable l in the loop below is used a little
@@ -277,33 +217,10 @@ class Network(object):
 
         return sum(int(np.array_equal(x, y)) for (x, y) in test_results)
 
-
-    def save(self, filename):
-        """Save the neural network to the filename."""
-        """Save it in json format, so as to be able to update the network structure later."""
-        data = {"sizes": self.sizes,
-                "weights": [w.tolist() for w in self.weights],
-                "biases": [b.tolist() for b in self.biases],
-                "cost": str(self.cost.__name__)}
-        with open(filename, "w") as f:
-            json.dump(data, f)
-
-    # load from file
-    @classmethod
-    def load(cls, filename):
-        """initialize the network from the file"""
-        data = ""
-        with open(filename, "r") as f:
-            data = json.load(f)
-        assert data != ""
-        cost = getattr(sys.modules[__name__], data["cost"])
-        network = cls(data["sizes"])
-        network.weights = [np.array(w) for w in data["weights"]]
-        network.biases = [np.array(b) for b in data["biases"]]
-        return network
-
-
-
+    def cost_derivative(self, output_activations, y):
+        """Return the vector of partial derivatives \partial C_x /
+        \partial a for the output activations."""
+        return (output_activations-y)
 
 #### Miscellaneous functions
 def sigmoid(z):
@@ -324,6 +241,3 @@ def maxarg(x):
         return np.array([[1], [0]])
     else:
         return np.array([[0], [1]])
-
-
-
