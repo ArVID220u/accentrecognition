@@ -33,6 +33,12 @@ def stft(sig, frameSize, overlapFac=0.5, window=np.hanning):
 
 
 def spectrogram(audiopath, time_compression=10, frequency_compression=10, cutoff=300):
+    if time_compression == None:
+        time_compression = 10
+    if frequency_compression == None:
+        frequency_compression = 10
+    if cutoff == None:
+        cutoff = 300
     binsize = 2**11
     samplerate, samples = wav.read(audiopath)
     #print(len(samples))
