@@ -68,6 +68,8 @@ def create_data_set(start_path, is_train_data, xsecfiles, time_compression=None,
 
     correct_answer = ans(start_path)
     precomputedspectrogrampath = start_path + "precomputed_spectrograms_" + xsecfiles + "_" + str(time_compression) + "_" + str(frequency_compression) + "_" + str(cutoff)
+    if time_compression == None and frequency_compression == None and cutoff == None:
+        precomputedspectrogrampath = start_path + "precomputed_spectrograms_" + xsecfiles
 
     if (not os.path.exists(precomputedspectrogrampath) or (len(os.listdir(precomputedspectrogrampath)) == 0)):
         if not os.path.exists(precomputedspectrogrampath):
@@ -145,7 +147,7 @@ def main():
 
     
     for filename in os.listdir(setup.DATA_PATH + "sommarprat"):
-        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "nomusic_fivesecfiles", time_compression = 1, frequency_compression = 1, cutoff = 100)
+        create_data_set(setup.DATA_PATH + "sommarprat/" + filename + "/", True, "nomusic_fivesecfiles", time_compression = None, frequency_compression = None, cutoff = None)
 
 
 
@@ -165,13 +167,18 @@ def main():
     data_points = training_data[0][0].size
 
     #create the network object
-    net = network.Network([data_points, 60, 2])
+    net = network.Network([data_points, 100, 2])
 
     print(len(test_data))
     print(len(training_data))
 
     #trains the network with the training data
-    history_data = net.SGD(training_data, epochs=100, mini_batch_size=10, eta=0.004, lmbda=1, test_data=test_data, monitor_training_accuracy=True, monitor_test_cost=True, monitor_training_cost=True, monitor_test_accuracy=True)
+    history_data = net.SGD(training_data, epochs=200, mini_batch_size=100, eta=0.02, lmbda=0.1,
+            test_data=test_data,
+            monitor_training_accuracy=False,
+            monitor_test_cost=False,
+            monitor_training_cost=False,
+            monitor_test_accuracy=True)
 
     
     # save the history data
