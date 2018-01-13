@@ -11,6 +11,7 @@ and omits many desirable features.
 #### Libraries
 # Standard library
 import random
+import sys
 
 # json is used for saving networks
 import json 
