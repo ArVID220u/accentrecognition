@@ -13,6 +13,9 @@ and omits many desirable features.
 # Standard library
 import random
 
+# json is used for saving networks
+import json 
+
 # Third-party libraries
 import numpy as np
 
@@ -223,7 +226,33 @@ class Network(object):
         return (output_activations-y)
 
 
-    def save(self, filename
+    def save(self, filename):
+        """Save the neural network to the filename."""
+        """Save it in json format, so as to be able to update the network structure later."""
+        data = {"sizes": self.sizes,
+                "weights": [w.tolist() for w in self.weights],
+                "biases": [b.tolist() for b in self.biases]}
+        with open(filename, "w") as f:
+            json.dump(data, f)
+
+    # load from file
+    @classmethod
+    def load(cls, filename):
+        """initialize the network from the file"""
+        data = ""
+        with open(filename, "r") as f:
+            data = json.load(f)
+        assert data != ""
+        network = cls(data["sizes"])
+        network.weights = [np.array(w) for w in data["weights"]]
+        network.biases = [np.array(b) for b in data["biases"]]
+        return network
+
+
+
+
+
+
 
 #### Miscellaneous functions
 def sigmoid(z):
