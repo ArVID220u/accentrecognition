@@ -1,5 +1,5 @@
 # accentrecognition
-Using neural networks to recognize Swedish accents.
+Using neural networks to recognize Swedish accents. For a complete overview of the project, read `final_report.pdf`.
 
 ## Setup
 
